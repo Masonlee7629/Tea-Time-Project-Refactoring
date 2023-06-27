@@ -5,6 +5,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.factory.PasswordEncoderFactories;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 
@@ -18,6 +20,8 @@ public class SecurityConfiguration {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
+            .headers().frameOptions().sameOrigin()
+            .and()
             .csrf().disable()   // CSRF(Cross-Site Request Forgery) 공격에 대한 Spring Security에 대한 설정을 비활성화
             .formLogin()    // 기본적인 인증 방법을 폼 로그인 방식으로 지정
             .loginPage("/auths/login-form") // loginPage()의 파라미터인 "/auths/login-form"로 AuthController의 loginForm() 핸들러 메서드에 요청을 전송
@@ -43,25 +47,10 @@ public class SecurityConfiguration {
         return http.build();
     }
 
-    /*
-    애플리케이션이 실행된 상태에서 사용자 인증을 위한 계정 정보를 메모리상에 고정된 값으로 설정한 예
-     */
+
+
     @Bean
-    public InMemoryUserDetailsManager userDetailsService() {
-        UserDetails user =
-            User.withDefaultPasswordEncoder()
-                .username("mason@gmail.com")
-                .password("1234")
-                .roles("USER")
-                .build();
-
-        UserDetails admin =
-            User.withDefaultPasswordEncoder()
-                .username("admin@gmail.com")
-                .password("1111")
-                .roles("ADMIN")
-                .build();
-
-        return new InMemoryUserDetailsManager(user, admin);
+    public PasswordEncoder passwordEncoder() {
+        return PasswordEncoderFactories.createDelegatingPasswordEncoder();
     }
 }
